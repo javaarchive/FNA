@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2022 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2021 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -182,7 +182,7 @@ namespace Microsoft.Xna.Framework.Content
 					 * need to decode the following data.
 					 */
 					string originalReaderTypeString = reader.ReadString();
-
+					Console.WriteLine("original reader type string " + originalReaderTypeString);
 					Func<ContentTypeReader> readerFunc;
 					if (typeCreators.TryGetValue(originalReaderTypeString, out readerFunc))
 					{
@@ -193,9 +193,18 @@ namespace Microsoft.Xna.Framework.Content
 					{
 						// Need to resolve namespace differences
 						string readerTypeString = originalReaderTypeString;
+						Console.WriteLine("Reader Type string -> " + readerTypeString);
 						readerTypeString = PrepareType(readerTypeString);
 
 						Type l_readerType = Type.GetType(readerTypeString);
+						if(l_readerType == null)
+						{
+							if (readerTypeString == "Microsoft.Xna.Framework.Content.ListReader`1[[System.Char, mscorlib]]")
+							{
+								// Ayo gimme the list reader
+								l_readerType = typeof(ListReader<Char>);
+							}
+						}
 						if (l_readerType != null)
 						{
 							ContentTypeReader typeReader;
@@ -230,12 +239,14 @@ namespace Microsoft.Xna.Framework.Content
 						}
 						else
 						{
+							
 							throw new ContentLoadException(
-									"Could not find ContentTypeReader Type. " +
-									"Please ensure the name of the Assembly that " +
-									"contains the Type matches the assembly in the full type name: " +
-									originalReaderTypeString + " (" + readerTypeString + ")"
+								"Could not find ContentTypeReader Type. " +
+								"Please ensure the name of the Assembly that " +
+								"contains the Type matches the assembly in the full type name: " +
+								originalReaderTypeString + " (" + readerTypeString + ")"
 							);
+							
 						}
 					}
 
